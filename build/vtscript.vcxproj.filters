@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\tokenize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\expression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\environment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\interpreter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\vtscript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\tokenize.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\expression.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\environment.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\interpreter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Elaine\Documents\Spring2017\Applied\project1-Elainek1\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{C4E29340-CB9C-395E-AF7C-132865194230}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{D4E7E68C-8818-3E9D-B718-09522AB3058C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

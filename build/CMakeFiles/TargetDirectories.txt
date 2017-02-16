@@ -1,0 +1,5 @@
+C:/Users/Elaine/Documents/Spring2017/Applied/project1-Elainek1/build/CMakeFiles/unittests.dir
+C:/Users/Elaine/Documents/Spring2017/Applied/project1-Elainek1/build/CMakeFiles/vtscript.dir
+C:/Users/Elaine/Documents/Spring2017/Applied/project1-Elainek1/build/CMakeFiles/RUN_TESTS.dir
+C:/Users/Elaine/Documents/Spring2017/Applied/project1-Elainek1/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Elaine/Documents/Spring2017/Applied/project1-Elainek1/build/CMakeFiles/ZERO_CHECK.dir
