@@ -26,6 +26,8 @@ int main(int argc, char*argv[])
 	if(argc == 1)
 	{
 		cout << "Interperter" << endl;
+		cout << "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)" << endl;
+		tokenizeInput("(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)");
 	}
 	else if(argc == 2)
 	{
