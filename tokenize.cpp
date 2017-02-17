@@ -1,62 +1,51 @@
 #include "tokenize.hpp"
 
-void tokenizeInput(std::string input)
+//std::vector<std::string> tokenizeInput(std::string input)
+std::vector<std::string> tokenizeInput(std::istream & inputString)
 {
-		/*// inputs
-		std::string str("abc:def");
-		char split_char1 = ':';
+	//std::istringstream inputString(input);  //converts string into a string stream
 
-		// work
-		std::istringstream split(str);
-		std::vector<std::string> tokens;
-		for (std::string each; std::getline(split, each, split_char); tokens.push_back(each));
-
-		// now use `tokens`*/
-	std::istringstream inputString(input);
-
-	std::string token;
-	std::vector<std::string> tokens;
-	inputString >> token;
+	std::string token; //place holder for each token
+	std::vector<std::string> tokens; //vector containing all tokens
+	inputString >> token; //read in first part seperated by white space
 	while (!inputString.fail())
 	{
-		//std::getline(inputString, token, " ");
-		std::string variable;
-		for (int i = 0; i < token.size(); i++)
+		std::string variable; //this is for multicharacter tokens
+		for (int i = 0; i < token.size(); i++) //iterate through each token to parse out the ( and )
 		{
-			if (token[i] == '(')
+			if (token[i] == '(') //push ( into vector
 			{
-				if (variable.size())
+				if (variable.size())  //if variable before ( push that into vector first
 				{
 					tokens.push_back(variable);
 					variable.clear();
 				}
 				tokens.push_back("(");
 			}
-			else if (token[i] == ')')
+			else if (token[i] == ')') //push ) into vector
 			{
-				if (variable.size())
+				if (variable.size()) //if variable before ) push that into vector first
 				{
 					tokens.push_back(variable);
 					variable.clear();
 				}
 				tokens.push_back(")");
 			}
-			else
+			else //otherwise
 			{
-				variable.push_back(token[i]);
-				if (i == (token.size() - 1))
+				variable.push_back(token[i]); //append each character to variable
+				if (i == (token.size() - 1))  //push variable at the end of token length
 				{
 					tokens.push_back(variable);
 				}
 			}
 			
 		}
-		//tokens.push_back(token);
-		//tokens.push_back("(");
-		inputString >> token;
+		inputString >> token;  //read in next part
 	}
-	for (int i = 0; i < tokens.size(); i++)
+	/*for (int i = 0; i < tokens.size(); i++) //print the token
 	{
 		std::cout << tokens[i] << "\n";
-	}
+	}*/
+	return tokens;
 }

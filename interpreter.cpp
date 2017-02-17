@@ -1,4 +1,5 @@
 #include "interpreter.hpp"
+#include "tokenize.hpp"
 
 Interpreter::Interpreter()
 {
@@ -9,6 +10,12 @@ Interpreter::Interpreter()
 // return true on success, false on failure
 bool Interpreter::parse(std::istream & expression) noexcept
 {
+	std::vector<std::string> tokens;
+	tokens = tokenizeInput(expression);
+	for (int i = 0; i < tokens.size(); i++) //print the token
+	{
+	std::cout << tokens[i] << "\n";
+	}
 	return true;
 }
 
@@ -18,4 +25,9 @@ bool Interpreter::parse(std::istream & expression) noexcept
 Expression eval()
 {
 	return "(a)";
+}
+
+void Interpreter::buildAST(std::vector<std::string> tokens)
+{
+
 }

@@ -17,6 +17,8 @@ public:
 	// throws InterpreterSemanticError if a semantic error is encountered
 	// the exception message string should document the nature of the semantic error 
 	Expression eval();
+private:
+	void buildAST(std::vector<std::string> tokens);
 };
 
 #endif

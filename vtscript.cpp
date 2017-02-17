@@ -13,8 +13,9 @@ using namespace std;
 
 int main(int argc, char*argv[])
 {
+	Interpreter interpreter;
 	string filename;  //for storing the filename grabbed from commandline
-	string expression;
+	string input;
 	std::vector<std::string>  arguments;
     for(int i = 0; i < argc; ++i)
 	{
@@ -25,43 +26,47 @@ int main(int argc, char*argv[])
 	//if there are more than one arguments grab the last one and use that for the filename
 	if(argc == 1)
 	{
-		cout << "Interperter" << endl;
-		cout << "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)" << endl;
-		tokenizeInput("(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)");
+		//std::vector<std::string> tokens;
+		while (1)
+		{
+			cout << "vtscript>";
+			//cout << "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)" << endl;
+			//input = "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)";
+			getline(cin, input);
+			std::istringstream inputString(input);
+			interpreter.parse(inputString);
+		}
 	}
 	else if(argc == 2)
 	{
 		filename = arguments[argc-1];
-		cout << filename << endl;
+		ifstream inputString(filename);
+		if (!inputString)
+		{
+			cout << "Error: Could not open file" << endl;
+			return EXIT_FAILURE; //if file doesnt open then return
+		}
+		interpreter.parse(inputString);
+
 	}
 	else if(argc == 3)
 	{
 		if(arguments[argc-2]=="-e")
 		{
-			expression = arguments[argc-1];
-			cout << expression << endl;
+			input = arguments[argc-1];
+			std::istringstream inputString(input);
+			interpreter.parse(inputString);
+		}
+		else
+		{
+			cout << "Error: Unexpected arguments of " << arguments[argc-2] << endl; //not appropriate -e flag specified so return with exit failure
+			return EXIT_FAILURE;
 		}
 	}
 	else
 	{
-		cout << "Error: Unexpected arguments" << endl; //no filename specified so return with exit failure
+		cout << "Error: Unexpected number of arguments" << endl; //no filename specified so return with exit failure
 		return EXIT_FAILURE;
 	}
-	//opens file
-	/*
-	ifstream ins(filename, std::ios::binary);
-	if(!ins)
-	{
-		cout << "Error: Could not open file" << endl;
-		return EXIT_FAILURE; //if file doesnt open then return
-	}
-	uint8_t value;  //used to read in each character
-	uint8_t lines[16];  //used to hold each line of characters to print out at the end
-	ins.read(reinterpret_cast<std::fstream::char_type*>(&value), sizeof value);  //gets character
-
-	while(!ins.fail())  //keep looping till end of file
-	{
-	}
-	*/
     return EXIT_SUCCESS;  //return success
 }

@@ -4,6 +4,6 @@
 #include <string>
 #include <iostream>
 
-void tokenizeInput(std::string input);
+//std::vector<std::string> tokenizeInput(std::string input);
 
-
+std::vector<std::string> tokenizeInput(std::istream & inputString);
