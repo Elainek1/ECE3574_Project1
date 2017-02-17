@@ -34,7 +34,12 @@ int main(int argc, char*argv[])
 			//input = "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)";
 			getline(cin, input);
 			std::istringstream inputString(input);
-			interpreter.parse(inputString);
+			bool parsePass = interpreter.parse(inputString);
+			if (!parsePass)
+			{
+				cout << "Error: Parsing error" << endl;
+				return EXIT_FAILURE;
+			}
 		}
 	}
 	else if(argc == 2)
@@ -46,8 +51,12 @@ int main(int argc, char*argv[])
 			cout << "Error: Could not open file" << endl;
 			return EXIT_FAILURE; //if file doesnt open then return
 		}
-		interpreter.parse(inputString);
-
+		bool parsePass = interpreter.parse(inputString);
+		if (!parsePass)
+		{
+			cout << "Error: Parsing error" << endl;
+			return EXIT_FAILURE;
+		}
 	}
 	else if(argc == 3)
 	{
@@ -55,7 +64,12 @@ int main(int argc, char*argv[])
 		{
 			input = arguments[argc-1];
 			std::istringstream inputString(input);
-			interpreter.parse(inputString);
+			bool parsePass = interpreter.parse(inputString);
+			if (!parsePass)
+			{
+				cout << "Error: Parsing error" << endl;
+				return EXIT_FAILURE;
+			}
 		}
 		else
 		{

@@ -7,14 +7,17 @@ std::vector<std::string> tokenizeInput(std::istream & inputString)
 
 	std::string token; //place holder for each token
 	std::vector<std::string> tokens; //vector containing all tokens
+	int parenthesisCounter= 0;
 	inputString >> token; //read in first part seperated by white space
 	while (!inputString.fail())
 	{
+		
 		std::string variable; //this is for multicharacter tokens
 		for (int i = 0; i < token.size(); i++) //iterate through each token to parse out the ( and )
 		{
 			if (token[i] == '(') //push ( into vector
 			{
+				parenthesisCounter++;
 				if (variable.size())  //if variable before ( push that into vector first
 				{
 					tokens.push_back(variable);
@@ -24,6 +27,7 @@ std::vector<std::string> tokenizeInput(std::istream & inputString)
 			}
 			else if (token[i] == ')') //push ) into vector
 			{
+				parenthesisCounter--;
 				if (variable.size()) //if variable before ) push that into vector first
 				{
 					tokens.push_back(variable);
@@ -47,5 +51,10 @@ std::vector<std::string> tokenizeInput(std::istream & inputString)
 	{
 		std::cout << tokens[i] << "\n";
 	}*/
+	if (parenthesisCounter != 0)
+	{
+		tokens.clear();
+		//return tokens;
+	}
 	return tokens;
 }

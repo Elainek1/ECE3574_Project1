@@ -1,10 +1,16 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 #include <string>
+#include <vector>
 
 class Expression
 {
 public:
+	enum expressionType {noneType, boolType, doubleType, stringType};
+	
+	expressionType atom;
+	std::vector<Expression *> children;
+	
 	// Default construct an Expression of type None
 	Expression();
 

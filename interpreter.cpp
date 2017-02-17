@@ -11,12 +11,22 @@ Interpreter::Interpreter()
 bool Interpreter::parse(std::istream & expression) noexcept
 {
 	std::vector<std::string> tokens;
+	
 	tokens = tokenizeInput(expression);
 	for (int i = 0; i < tokens.size(); i++) //print the token
 	{
 	std::cout << tokens[i] << "\n";
 	}
-	return true;
+	if (tokens.size()>1)
+	{
+		if (!(tokens[0] == "(") || !(tokens[tokens.size() - 1] == ")"))
+		{
+			return false;
+		}
+		buildAST(tokens);
+		return true;
+	}
+	return false;
 }
 
 // Evaluate the current AST and return the resulting Expression
@@ -29,5 +39,10 @@ Expression eval()
 
 void Interpreter::buildAST(std::vector<std::string> tokens)
 {
+	Expression *root = new Expression;
+	Expression *currLevel;
+	Expression *previousLevel;
+
+	//if()
 
 }
