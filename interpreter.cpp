@@ -15,7 +15,7 @@ bool Interpreter::parse(std::istream & expression) noexcept
 	tokens = tokenizeInput(expression);
 	for (int i = 0; i < tokens.size(); i++) //print the token
 	{
-	std::cout << tokens[i] << "\n";
+		std::cout << tokens[i] << "\n";
 	}
 	if (tokens.size()>1)
 	{
