@@ -13,6 +13,13 @@ using namespace std;
 
 int main(int argc, char*argv[])
 {
+	/*Expression a = new Expression(1);
+	a.boolAtom = true;
+	Expression * newPointer;
+	newPointer = new Expression(1);
+	a.children.push_back(newPointer);
+	std::cout << a.boolAtom;
+	*/
 	Interpreter interpreter;
 	string filename;  //for storing the filename grabbed from commandline
 	string input;
@@ -33,12 +40,17 @@ int main(int argc, char*argv[])
 			//cout << "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)" << endl;
 			//input = "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)";
 			getline(cin, input);
+			if (input == "q")
+			{
+				break;
+			}
 			std::istringstream inputString(input);
 			bool parsePass = interpreter.parse(inputString);
 			if (!parsePass)
 			{
 				cout << "Error: Parsing error" << endl;
-				return EXIT_FAILURE;
+				Interpreter interpreter;
+				//return EXIT_FAILURE;
 			}
 		}
 	}

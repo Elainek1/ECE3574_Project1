@@ -5,21 +5,48 @@
 
 class Expression
 {
+	//enum expressionType { noneType, boolType, doubleType, stringType };
+	
+	/*expressionType atomType;
+	switch (atomType)
+	{
+	case noneType:
+		break;
+	case boolType:
+		bool atom;
+		break;
+	case doubleType:
+		double atom;
+	case stringType:
+		std::string atom;
+		break;
+	default:
+		break;
+	}*/
+	//expressionType atom;
+	
 public:
-	enum expressionType {noneType, boolType, doubleType, stringType};
-	
-	expressionType atom;
-
+	bool boolAtom;
+	double doubleAtom;
+	std::string stringAtom;
+	Expression * parent;
+	//auto atom;
 	std::vector<Expression *> children;
-	
+
 	// Default construct an Expression of type None
 	Expression();
+
+	//Default deconstructor
+	//~Expression();
 
 	// Construct an Expression with a single Boolean atom with value
 	Expression(bool value);
 
 	// Construct an Expression with a single Number atom with value
 	Expression(double value);
+
+	// Construct an Expression with a single Number atom with value
+	Expression(int value);
 
 	// Construct an Expression with a single Symbol atom with value
 	Expression(const std::string & value);
