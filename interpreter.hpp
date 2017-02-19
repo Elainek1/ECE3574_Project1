@@ -24,7 +24,7 @@ private:
 	void buildAST(std::vector<std::string> tokens);
 	void deleteAST(Expression *& curLevel);
 	void checkToken(std::string token, Expression *& curLevel);
-	void printAtom(Expression *& curLevel);
+	void printAtom(Expression curLevel);
 	void traversePost(Expression* curLevel);
 };
 

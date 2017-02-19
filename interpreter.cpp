@@ -31,7 +31,9 @@ bool Interpreter::parse(std::istream & expression) noexcept
 		}
 		buildAST(tokens);
 		Expression answer = eval();
-		std::cout << answer.doubleAtom << std::endl;
+
+		printAtom(answer);
+		//std::cout << printAtom(&answer) << std::endl;
 
 
 		//std::cout << answer.stringAtom;
@@ -51,63 +53,175 @@ Expression Interpreter::eval()
 }
 Expression Interpreter::eval(Expression *& curLevel)
 {
-	Expression * answer = new Expression(0.0);
+	Expression * answer = new Expression();
 	//answer.doubleAtom = 0;
-	if (curLevel == nullptr)
-	{
-		return *answer;
-	}
-	else
-	{
-		if (curLevel->stringAtom == "+")
+	try {
+		if (curLevel == nullptr)
 		{
-			for (int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
-			{
-				answer->doubleAtom += (eval(curLevel->children[childIndex]).doubleAtom);
-				std::cout << answer->doubleAtom << " ";
-			}
-			return *answer;
-		}
-		else if((curLevel->stringAtom == "/") && (curLevel->children.size() == 2))
-		{
-			answer->doubleAtom = (eval(curLevel->children[0]).doubleAtom) / (eval(curLevel->children[1]).doubleAtom);
-			return *answer;
-		}
-		else if ((curLevel->stringAtom == "*") && (curLevel->children.size() > 1))
-		{
-			answer->doubleAtom = 1;
-			for (int i = 0; i < curLevel->children.size(); i++)
-			{
-				answer->doubleAtom *= eval(curLevel->children[i]).doubleAtom;
-			}
-			return *answer;
-		}
-		if (curLevel->stringAtom == "-")
-		{
-			if (curLevel->children.size() == 1)
-			{
-				answer->doubleAtom -= (eval(curLevel->children[0]).doubleAtom);
-			}
-			else if (curLevel->children.size() == 2)
-			{
-				answer->doubleAtom = (eval(curLevel->children[0]).doubleAtom) - (eval(curLevel->children[1]).doubleAtom);
-				std::cout << answer->doubleAtom << " ";
-			}
-			else
-			{
-				std::cout << "Error: too many arguments for -" << std::endl;
-			}
+			Expression * answer = new Expression(0.0);
 			return *answer;
 		}
 		else
 		{
-			return *curLevel;
+			if (curLevel->stringAtom == "+")
+			{
+				Expression * answer = new Expression(0.0);
+				for (int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
+				{
+					answer->doubleAtom += (eval(curLevel->children[childIndex]).doubleAtom);
+					std::cout << answer->doubleAtom << " ";
+				}
+				return *answer;
+			}
+			else if ((curLevel->stringAtom == "/") && (curLevel->children.size() == 2))
+			{
+				Expression * answer = new Expression(0.0);
+				answer->doubleAtom = (eval(curLevel->children[0]).doubleAtom) / (eval(curLevel->children[1]).doubleAtom);
+				return *answer;
+			}
+			else if ((curLevel->stringAtom == "*") && (curLevel->children.size() > 1))
+			{
+				Expression * answer = new Expression(1.0);
+				for (int i = 0; i < curLevel->children.size(); i++)
+				{
+					answer->doubleAtom *= eval(curLevel->children[i]).doubleAtom;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == "-")
+			{
+				Expression * answer = new Expression(0.0);
+				if (curLevel->children.size() == 1)
+				{
+					answer->doubleAtom -= (eval(curLevel->children[0]).doubleAtom);
+				}
+				else if (curLevel->children.size() == 2)
+				{
+					answer->doubleAtom = (eval(curLevel->children[0]).doubleAtom) - (eval(curLevel->children[1]).doubleAtom);
+					std::cout << answer->doubleAtom << " ";
+				}
+				else
+				{
+					throw 1;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == "=")
+			{
+				Expression * answer = new Expression(false);
+				if (curLevel->children.size() == 2)
+				{
+					answer->boolAtom = (eval(curLevel->children[0]).doubleAtom) == (eval(curLevel->children[1]).doubleAtom);
+				}
+				else
+				{
+					std::cout << "Error: Incorrrect number of arguments for =" << std::endl;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == ">=")
+			{
+				Expression * answer = new Expression(false);
+				if (curLevel->children.size() == 2)
+				{
+					answer->boolAtom = (eval(curLevel->children[0]).doubleAtom) >= (eval(curLevel->children[1]).doubleAtom);
+				}
+				else
+				{
+					std::cout << "Error: Incorrrect number of arguments for >=" << std::endl;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == ">")
+			{
+				Expression * answer = new Expression(false);
+				if (curLevel->children.size() == 2)
+				{
+					answer->boolAtom = (eval(curLevel->children[0]).doubleAtom) > (eval(curLevel->children[1]).doubleAtom);
+				}
+				else
+				{
+					std::cout << "Error: Incorrrect number of arguments for >" << std::endl;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == "<=")
+			{
+				Expression * answer = new Expression(false);
+				if (curLevel->children.size() == 2)
+				{
+					answer->boolAtom = (eval(curLevel->children[0]).doubleAtom) <= (eval(curLevel->children[1]).doubleAtom);
+				}
+				else
+				{
+					std::cout << "Error: Incorrrect number of arguments for >" << std::endl;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == "<")
+			{
+				Expression * answer = new Expression(false);
+				if (curLevel->children.size() == 2)
+				{
+					answer->boolAtom = (eval(curLevel->children[0]).doubleAtom) < (eval(curLevel->children[1]).doubleAtom);
+				}
+				else
+				{
+					std::cout << "Error: Incorrrect number of arguments for >" << std::endl;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == "or")
+			{
+				Expression * answer = new Expression(false);
+				if (curLevel->children.size() > 1)
+				{
+					for (int i = 0; i < curLevel->children.size(); i++)
+					{
+						answer->boolAtom = answer->boolAtom || eval(curLevel->children[i]).boolAtom;
+					}
+					return *answer;
+				}
+				else
+				{
+					std::cout << "Error: Not enough arguments for or" << std::endl;
+				}
+				return *answer;
+			}
+			else if (curLevel->stringAtom == "and")
+			{
+				Expression * answer = new Expression(true);
+				if (curLevel->children.size() > 1)
+				{
+					for (int i = 0; i < curLevel->children.size(); i++)
+					{
+						answer->boolAtom = answer->boolAtom && eval(curLevel->children[i]).boolAtom;
+					}
+					return *answer;
+				}
+				else
+				{
+					std::cout << "Error: Not enough arguments for and" << std::endl;
+				}
+				return *answer;
+			}
+			else
+			{
+				return *curLevel;
+			}
+			/*for (int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
+			{
+				eval(curLevel->children[childIndex]);
+			}
+			std::cout << curLevel->stringAtom << std::endl;*/
 		}
-		/*for (int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
-		{
-			eval(curLevel->children[childIndex]);
+	}
+	catch (int e) {
+		if (e == 1) {
+			std::cout << "Error: too many arguments for -" << std::endl;
 		}
-		std::cout << curLevel->stringAtom << std::endl;*/
+		Expression a = new Expression();
+		return a;
 	}
 
 	return *answer;
@@ -176,7 +290,7 @@ void Interpreter::traversePost(Expression * curLevel)
 			traversePost(curLevel->children[childIndex]);
 		}
 		
-		printAtom(curLevel);
+		printAtom(*curLevel);
 		//std::cout << curLevel->boolAtom << "," << curLevel->doubleAtom << "," << curLevel->stringAtom << std::endl;
 	}
 }
@@ -199,19 +313,23 @@ void Interpreter::deleteAST(Expression *& curLevel)
 	}
 }
 
-void Interpreter::printAtom(Expression *& curLevel)
+void Interpreter::printAtom(Expression curLevel)
 {
-	if (curLevel->atomType == 1)
+	if (curLevel.atomType == 0)
 	{
-		std::cout << curLevel->boolAtom << '\n';
+		return;
 	}
-	else if (curLevel->atomType == 2)
+	if (curLevel.atomType == 1)
 	{
-		std::cout << curLevel->doubleAtom << '\n';
+		std::cout << curLevel.boolAtom << '\n';
 	}
-	else if (curLevel->atomType == 3)
+	else if (curLevel.atomType == 2)
 	{
-		std::cout << curLevel->stringAtom << '\n';
+		std::cout << curLevel.doubleAtom << '\n';
+	}
+	else if (curLevel.atomType == 3)
+	{
+		std::cout << curLevel.stringAtom << '\n';
 	}
 	return;
 }
