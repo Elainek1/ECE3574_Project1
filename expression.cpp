@@ -1,8 +1,10 @@
 #include "expression.hpp"
+#include <iostream>
 
 Expression::Expression()
 {
-	
+	parent = nullptr;
+	atomType = noneType;
 }
 /*
 Expression::~Expression()
@@ -17,23 +19,31 @@ Expression::~Expression()
 
 Expression::Expression(bool value)
 {
+	parent = nullptr;
+	atomType = boolType;
 	boolAtom = value;
 }
 
 // Construct an Expression with a single Number atom with value
 Expression::Expression(double value)
 {
+	parent = nullptr;
+	atomType = doubleType;
 	doubleAtom = value;
 }
 
 // Construct an Expression with a single Symbol atom with value
 Expression::Expression(const std::string & value)
 {
+	parent = nullptr;
+	atomType = stringType;
 	stringAtom = value;
 }
 
 Expression::Expression(int value)
 {
+	parent = nullptr;
+	atomType = doubleType;
 	doubleAtom = (double) value;
 }
 

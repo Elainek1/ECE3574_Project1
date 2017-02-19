@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 #include <string>
 #include "expression.hpp"
+//#include "environment.hpp"
 
 class Interpreter
 {
@@ -17,13 +18,16 @@ public:
 	// throws InterpreterSemanticError if a semantic error is encountered
 	// the exception message string should document the nature of the semantic error 
 	Expression eval();
-	Expression eval(Expression * curLevel);
+	Expression eval(Expression *& curLevel);
 private:
-	Expression * root;
+	Expression * rootAST;
 	void buildAST(std::vector<std::string> tokens);
-	void deleteAST(Expression * curLevel);
+	void deleteAST(Expression *& curLevel);
+	void checkToken(std::string token, Expression *& curLevel);
+	void printAtom(Expression *& curLevel);
+	void traversePost(Expression* curLevel);
 };
 
 
-void traversePost(Expression* curLevel);
+
 #endif

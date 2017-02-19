@@ -6,26 +6,9 @@
 class Expression
 {
 	//enum expressionType { noneType, boolType, doubleType, stringType };
-	
-	/*expressionType atomType;
-	switch (atomType)
-	{
-	case noneType:
-		break;
-	case boolType:
-		bool atom;
-		break;
-	case doubleType:
-		double atom;
-	case stringType:
-		std::string atom;
-		break;
-	default:
-		break;
-	}*/
-	//expressionType atom;
-	
 public:
+	enum expressionType { noneType, boolType, doubleType, stringType };
+	expressionType atomType;
 	bool boolAtom;
 	double doubleAtom;
 	std::string stringAtom;
