@@ -64,7 +64,7 @@ TEST_CASE( "Test Interpreter parser with expected input", "[interpreter]" ) {
 
 TEST_CASE( "Test Interpreter parser with truncated input", "[interpreter]" ) {
 
-
+	//added test case
   {
     std::string program = "(";
     std::istringstream iss(program);
@@ -93,6 +93,7 @@ TEST_CASE( "Test Interpreter parser with truncated input", "[interpreter]" ) {
   }
 }
 
+//added test case
 TEST_CASE("Test Interpreter parser with second half input", "[interpreter]") {
 
 
@@ -134,6 +135,43 @@ TEST_CASE( "Test Interpreter parser with extra input", "[interpreter]" ) {
   bool ok = interp.parse(iss);
 
   REQUIRE(ok == false);
+}
+
+TEST_CASE("Test Interpreter parser with extra ( input", "[interpreter]") {
+
+	std::string program = "(begin (define r 10) ((* pi (* r r)) )";
+	std::istringstream iss(program);
+
+	Interpreter interp;
+
+	bool ok = interp.parse(iss);
+
+	REQUIRE(ok == false);
+}
+
+TEST_CASE("Test Interpreter parser with imblanced ()", "[interpreter]") {
+
+	{
+		std::string program = "(( )";
+		std::istringstream iss(program);
+
+		Interpreter interp;
+
+		bool ok = interp.parse(iss);
+
+		REQUIRE(ok == false);
+	}
+
+	{
+		std::string program = "( ))";
+		std::istringstream iss(program);
+
+		Interpreter interp;
+
+		bool ok = interp.parse(iss);
+
+		REQUIRE(ok == false);
+	}
 }
 
 TEST_CASE( "Test Interpreter parser with single non-keyword", "[interpreter]" ) {
@@ -434,12 +472,14 @@ TEST_CASE( "Test logical procedures", "[interpreter]" ) {
   REQUIRE(run("(and False True)") == Expression(false));
   REQUIRE(run("(and False False)") == Expression(false));
   REQUIRE(run("(and True True False)") == Expression(false));
+  REQUIRE(run("(and True True True)") == Expression(false));
 
   REQUIRE(run("(or True True)") == Expression(true));
   REQUIRE(run("(or True False)") == Expression(true));
   REQUIRE(run("(or False True)") == Expression(true));
   REQUIRE(run("(or False False)") == Expression(false));
   REQUIRE(run("(or True True False)") == Expression(true));
+  REQUIRE(run("(or False False False)") == Expression(false));
 }
 
 TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
@@ -502,6 +542,24 @@ TEST_CASE( "Test all syntactically and semantically CORRECT files.", "[interpret
     REQUIRE(result == expected_result);
   }
 }
+
+TEST_CASE("Test redefinition of special forms", "[interpreter]") {
+
+	std::vector<std::string> programs = { "(define begin 1)", // redefine of begin
+		"(define define 1)", // redefine of define
+		"(define if 1)" }; // redefine of if
+	for (auto s : programs) {
+		Interpreter interp;
+
+		std::istringstream iss(s);
+
+		bool ok = interp.parse(iss);
+		REQUIRE(ok == true);
+
+		REQUIRE_THROWS_AS(interp.eval(), InterpreterSemanticError);
+	}
+}
+
 
 /*
 TEST_CASE("Test Tokenize", "[tokenize]") {

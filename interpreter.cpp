@@ -40,6 +40,17 @@ bool Interpreter::parse(std::istream & expression) noexcept
 			return false;
 		}
 		printExpression(output);
+		/*
+		if (output.atomType == 0)
+		{
+			environment = Environment();
+			//return false;
+		}
+		else
+		{
+			printExpression(output);
+		}
+		*/
 		//std::cout << printAtom(&answer) << std::endl;
 
 

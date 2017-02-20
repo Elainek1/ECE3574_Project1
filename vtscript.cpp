@@ -54,7 +54,26 @@ int main(int argc, char*argv[])
 			cout << "Error: Could not open file" << endl;
 			return EXIT_FAILURE; //if file doesnt open then return
 		}
-		bool parsePass = interpreter.parse(inputString);
+		std::string inputAll = "";
+		std::string inputPart = "";
+		while (!inputString.eof())
+		{
+			getline(inputString, inputPart);
+			if (inputPart.size() > 0)
+			{
+				if (inputPart[0] == ';')
+				{
+
+				}
+				else
+				{
+					inputAll += inputPart;
+				}
+			}
+			
+		}
+		std::istringstream inputStr(inputAll);
+		bool parsePass = interpreter.parse(inputStr);
 		if (!parsePass)
 		{
 			cout << "Error: Parsing error" << endl;
