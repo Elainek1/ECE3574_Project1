@@ -8,7 +8,7 @@
 #include "interpreter_semantic_error.hpp"
 #include "interpreter.hpp"
 #include "expression.hpp"
-#include "build/test_config.hpp"
+#include "test_config.hpp"
 
 Expression run(const std::string & program){
   

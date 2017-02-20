@@ -13,14 +13,7 @@ using namespace std;
 
 int main(int argc, char*argv[])
 {
-	/*Expression a = new Expression(1);
-	a.boolAtom = true;
-	Expression * newPointer;
-	newPointer = new Expression(1);
-	a.children.push_back(newPointer);
-	std::cout << a.boolAtom;
-	*/
-	Interpreter interpreter;
+	Interpreter interpreter = Interpreter();
 	string filename;  //for storing the filename grabbed from commandline
 	string input;
 	std::vector<std::string>  arguments;
@@ -37,8 +30,6 @@ int main(int argc, char*argv[])
 		while (1)
 		{
 			cout << "vtscript>";
-			//cout << "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)" << endl;
-			//input = "(begin\n\t(define b pi)\n\t(if (< a b) b a)\n\t)";
 			getline(cin, input);
 			if (input == "q")
 			{
@@ -49,7 +40,7 @@ int main(int argc, char*argv[])
 			if (!parsePass)
 			{
 				cout << "Error: Parsing error" << endl;
-				Interpreter interpreter;
+				interpreter = Interpreter();
 				//return EXIT_FAILURE;
 			}
 		}
