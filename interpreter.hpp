@@ -40,9 +40,9 @@ private:
 	Expression greater(Expression *& curLevel);
 	Expression lessEqual(Expression *& curLevel);
 	Expression less(Expression *& curLevel);
-	Expression or (Expression *& curLevel);
-	Expression and (Expression *& curLevel);
-	Expression not(Expression *& curLevel);
+	Expression orFunct(Expression *& curLevel);
+	Expression andFunct(Expression *& curLevel);
+	Expression notFunct(Expression *& curLevel);
 	Expression ifExpression(Expression *& curLevel);
 	Expression begin(Expression *& curLevel);
 	Expression define(Expression *& curLevel);

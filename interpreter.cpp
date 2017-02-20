@@ -110,15 +110,15 @@ Expression Interpreter::eval(Expression *& curLevel)
 			}
 			else if (curLevel->stringAtom == "or")
 			{
-				return or(curLevel);
+				return orFunct(curLevel);
 			}
 			else if (curLevel->stringAtom == "and")
 			{
-				return and(curLevel);
+				return andFunct(curLevel);
 			}
 			else if (curLevel->stringAtom == "not")
 			{
-				return not(curLevel);
+				return notFunct(curLevel);
 			}
 			else if (curLevel->stringAtom == "if")
 			{
@@ -547,7 +547,7 @@ Expression Interpreter::less(Expression *& curLevel)
 	}
 }
 
-Expression Interpreter::or(Expression *& curLevel)
+Expression Interpreter::orFunct(Expression *& curLevel)
 {
 	try
 	{
@@ -573,7 +573,7 @@ Expression Interpreter::or(Expression *& curLevel)
 	}
 }
 
-Expression Interpreter::and(Expression *& curLevel)
+Expression Interpreter::andFunct(Expression *& curLevel)
 {
 	try
 	{
@@ -601,7 +601,7 @@ Expression Interpreter::and(Expression *& curLevel)
 	
 }
 
-Expression Interpreter::not(Expression *& curLevel)
+Expression Interpreter::notFunct(Expression *& curLevel)
 {
 	try
 	{

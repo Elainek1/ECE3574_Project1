@@ -1,10 +1,26 @@
 #include "environment.hpp"
+#include <math.h>  
 
 Environment::Environment()
 {
 	environmentMap1.clear();
 	environmentMap2.clear();
 	environmentMap2["pi"] = atan2(0, -1);
+	environmentMap2["not"] = 0;
+	environmentMap2["and"] = 0;
+	environmentMap2["or"] = 0;
+	environmentMap2["<"] = 0;
+	environmentMap2["<="] = 0;
+	environmentMap2[">"] = 0;
+	environmentMap2[">="] = 0;
+	environmentMap2["="] = 0;
+	environmentMap2["+"] = 0;
+	environmentMap2["-"] = 0;
+	environmentMap2["*"] = 0;
+	environmentMap2["/"] = 0;
+	environmentMap2["define"] = 0;
+	environmentMap2["begin"] = 0;
+	environmentMap2["if"] = 0;
 }
 
 double Environment::addDoubleSymbol(std::string symbol, double value)
