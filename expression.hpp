@@ -20,7 +20,7 @@ public:
 	Expression();
 
 	//Default deconstructor
-	//~Expression();
+	~Expression();
 
 	// Construct an Expression with a single Boolean atom with value
 	Expression(bool value);

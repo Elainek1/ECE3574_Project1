@@ -6,16 +6,19 @@ Expression::Expression()
 	parent = nullptr;
 	atomType = noneType;
 }
-/*
+
 Expression::~Expression()
 {
+	/*
 	for (int i = 0; i < children.size(); i++)
 	{
-		delete children[i];
+		(*children[i]).~Expression();
 	}
+	delete this;
+	*/
 	//delete parent;
 }
-*/
+
 
 Expression::Expression(bool value)
 {
@@ -38,13 +41,6 @@ Expression::Expression(const std::string & value)
 	parent = nullptr;
 	atomType = stringType;
 	stringAtom = value;
-}
-
-Expression::Expression(int value)
-{
-	parent = nullptr;
-	atomType = doubleType;
-	doubleAtom = (double) value;
 }
 
 // Equality operator for two Expressions, two expressions are equal if the have the same 

@@ -1,10 +1,17 @@
 #include "environment.hpp"
-#include <math.h>  
+#include "interpreter.hpp"
+#include <math.h>
+
+typedef Expression(*functPtr)(Expression *);
 
 Environment::Environment()
 {
 	environmentMap1.clear();
 	environmentMap2.clear();
+	
+//	environmentMap0["+"] = add;
+
+	//environment["pi"] = Atom(atan2(0, -1));
 	environmentMap2["pi"] = atan2(0, -1);
 	environmentMap2["not"] = 0;
 	environmentMap2["and"] = 0;
@@ -43,10 +50,19 @@ int Environment::symbolExist(std::string symbol)
 	{
 		return 2;
 	}
+	else if (environmentMap0.find(symbol) != environmentMap0.end())
+	{
+		return 3;
+	}
 	else
 	{
 		return 0;
 	}
+}
+
+functPtr Environment::getFunctPtr(std::string symbol)
+{
+	return environmentMap0[symbol];
 }
 double Environment::getDoubleSymbol(std::string symbol)
 {
