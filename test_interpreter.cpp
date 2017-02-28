@@ -472,7 +472,7 @@ TEST_CASE( "Test logical procedures", "[interpreter]" ) {
   REQUIRE(run("(and False True)") == Expression(false));
   REQUIRE(run("(and False False)") == Expression(false));
   REQUIRE(run("(and True True False)") == Expression(false));
-  REQUIRE(run("(and True True True)") == Expression(false));
+  REQUIRE(run("(and True True True)") == Expression(true));
 
   REQUIRE(run("(or True True)") == Expression(true));
   REQUIRE(run("(or True False)") == Expression(true));

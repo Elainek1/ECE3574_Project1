@@ -50,5 +50,46 @@ Expression::Expression(const std::string & value)
 // type, atom value, and number of arguments
 bool Expression::operator==(const Expression & exp) const noexcept
 {
+	if (this->atomType == exp.atomType)
+	{
+		if (this->atomType == 0)
+		{
+			return true;
+		}
+		else if (this->atomType == 1)
+		{
+			if ((this->boolAtom == exp.boolAtom) && (this->children.size() == exp.children.size()))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (this->atomType == 2)
+		{
+			if ((this->doubleAtom == exp.doubleAtom) && (this->children.size() == exp.children.size()))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (this->atomType == 3)
+		{
+			if ((this->stringAtom == exp.stringAtom) && (this->children.size() == exp.children.size()))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
 	return true;
 }

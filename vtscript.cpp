@@ -28,7 +28,7 @@ int main(int argc, char*argv[])
 	if(argc == 1)
 	{
 		//std::vector<std::string> tokens;
-		while (1)
+		while (true)
 		{
 			cout << "vtscript>";
 			getline(cin, input);
