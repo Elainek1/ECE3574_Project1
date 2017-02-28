@@ -7,7 +7,7 @@ class Expression
 {
 	//enum expressionType { noneType, boolType, doubleType, stringType };
 public:
-	enum expressionType { noneType, boolType, doubleType, stringType };
+	enum expressionType { noneType = 0, boolType, doubleType, stringType };
 	expressionType atomType;
 	bool boolAtom;
 	double doubleAtom;

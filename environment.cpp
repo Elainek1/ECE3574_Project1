@@ -13,6 +13,8 @@ Environment::Environment()
 
 	//environment["pi"] = Atom(atan2(0, -1));
 	environmentMap2["pi"] = atan2(0, -1);
+	environmentMap2["True"] = 0;
+	environmentMap2["False"] = 0;
 	environmentMap2["not"] = 0;
 	environmentMap2["and"] = 0;
 	environmentMap2["or"] = 0;
@@ -58,6 +60,31 @@ int Environment::symbolExist(std::string symbol)
 	{
 		return 0;
 	}
+}
+
+void Environment::reset()
+{
+	environmentMap1.clear();
+	environmentMap2.clear();
+
+	environmentMap2["pi"] = atan2(0, -1);
+	environmentMap2["True"] = 0;
+	environmentMap2["False"] = 0;
+	environmentMap2["not"] = 0;
+	environmentMap2["and"] = 0;
+	environmentMap2["or"] = 0;
+	environmentMap2["<"] = 0;
+	environmentMap2["<="] = 0;
+	environmentMap2[">"] = 0;
+	environmentMap2[">="] = 0;
+	environmentMap2["="] = 0;
+	environmentMap2["+"] = 0;
+	environmentMap2["-"] = 0;
+	environmentMap2["*"] = 0;
+	environmentMap2["/"] = 0;
+	environmentMap2["define"] = 0;
+	environmentMap2["begin"] = 0;
+	environmentMap2["if"] = 0;
 }
 
 functPtr Environment::getFunctPtr(std::string symbol)

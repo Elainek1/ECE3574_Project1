@@ -20,16 +20,17 @@ public:
 	// throws InterpreterSemanticError if a semantic error is encountered
 	// the exception message string should document the nature of the semantic error 
 	Expression eval();
-	Expression eval(Expression * curLevel);
-	
+	Expression evalExp(Expression * curLevel);
+	void printExpression(Expression curLevel);
+	void reset();
 private:
 	Environment environment;
 
 	Expression * rootAST;
-	void buildAST(std::vector<std::string> tokens);
+	bool buildAST(std::vector<std::string> tokens);
 	void deleteAST(Expression * curLevel);
 	Expression* checkToken(std::string token, Expression * curLevel);
-	void printExpression(Expression curLevel);
+
 	void traversePost(Expression* curLevel);
 
 	Expression add(Expression * curLevel);

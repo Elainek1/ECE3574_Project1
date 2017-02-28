@@ -4,6 +4,7 @@
 Expression::Expression()
 {
 	parent = nullptr;
+	stringAtom = "";
 	atomType = noneType;
 }
 
@@ -24,6 +25,7 @@ Expression::Expression(bool value)
 {
 	parent = nullptr;
 	atomType = boolType;
+	stringAtom = "";
 	boolAtom = value;
 }
 
@@ -32,6 +34,7 @@ Expression::Expression(double value)
 {
 	parent = nullptr;
 	atomType = doubleType;
+	stringAtom = "";
 	doubleAtom = value;
 }
 

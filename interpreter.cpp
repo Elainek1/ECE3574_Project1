@@ -7,7 +7,7 @@
 
 Interpreter::Interpreter()
 {
-	environment = Environment();
+	//environment = Environment();
 	rootAST = nullptr;
 }
 
@@ -15,7 +15,15 @@ Interpreter::~Interpreter()
 {
 
 	deleteAST(rootAST);
+	rootAST = nullptr;
 
+}
+
+void Interpreter::reset()
+{
+	deleteAST(rootAST);
+	rootAST = nullptr;
+	environment.reset();
 }
 
 // Given a vtscript program as a std::istream, attempt to parse into an internal AST
@@ -23,8 +31,28 @@ Interpreter::~Interpreter()
 bool Interpreter::parse(std::istream & expression) noexcept
 {
 	std::vector<std::string> tokens;
-	
-	tokens = tokenizeInput(expression);
+	//std::istringstream inputString(input);
+	std::string inputAll = "";
+	std::string inputPart = "";
+	while (!expression.eof())
+	{
+		getline(expression, inputPart);
+		for (int i = 0; i < inputPart.size(); i++)
+		{
+			if (inputPart[i] == ';')
+			{
+				break;
+			}
+			else
+			{
+				inputAll += inputPart[i];
+			}
+		}
+		inputAll += '\n';
+
+	}
+	std::istringstream inputStr(inputAll);
+	tokens = tokenizeInput(inputStr);
 	/*
 	for (int i = 0; i < tokens.size(); i++) //print the token
 	{
@@ -33,22 +61,34 @@ bool Interpreter::parse(std::istream & expression) noexcept
 	*/
 	if (tokens.size()>1)
 	{
-		if (!(tokens[0] == "(") || !(tokens[tokens.size() - 1] == ")"))
+		
+		if (!buildAST(tokens))
 		{
 			return false;
 		}
-		buildAST(tokens);
-		Expression output = eval();
-		
-		
-		
-		if (output.atomType == 0)
+/*
+		try
 		{
-			return false;
+			Expression output = eval();		
+		
+			if (output.atomType == 0)
+			{
+				//deleteAST(rootAST);
+				environment = Environment();
+				//return false;
+			}
+			else
+			{
+				printExpression(output);
+			}
 		}
-		printExpression(output);
-
+		catch (InterpreterSemanticError error)
+		{
+			environment = Environment();
+		}
 		deleteAST(rootAST);
+		rootAST = nullptr;
+		*/
 		/*
 		if (output.atomType == 0)
 		{
@@ -60,11 +100,6 @@ bool Interpreter::parse(std::istream & expression) noexcept
 			printExpression(output);
 		}
 		*/
-		//std::cout << printAtom(&answer) << std::endl;
-
-
-		//std::cout << answer.stringAtom;
-		//deleteAST(rootAST);
 		return true;
 	}
 	return false;
@@ -75,10 +110,23 @@ bool Interpreter::parse(std::istream & expression) noexcept
 // the exception message string should document the nature of the semantic error 
 Expression Interpreter::eval()
 {
-	//traversePost(rootAST);
-	return eval(rootAST);
+	try
+	{
+		Expression answer = evalExp(rootAST);
+		deleteAST(rootAST);
+		rootAST = nullptr;
+		return answer;
+	}
+	catch (InterpreterSemanticError error)
+	{
+		//std::cout << error.what() << "\n";
+		deleteAST(rootAST);
+		rootAST = nullptr;
+		throw;
+	}
+	
 }
-Expression Interpreter::eval(Expression * curLevel)
+Expression Interpreter::evalExp(Expression * curLevel)
 {
 	Expression answer = Expression();
 	//answer.doubleAtom = 0;
@@ -164,7 +212,9 @@ Expression Interpreter::eval(Expression * curLevel)
 			}
 			else if (curLevel->atomType == Expression::noneType)
 			{
-				throw "Error: Input is not valid";
+				std::string error = "Error: Input is not valid";
+				throw InterpreterSemanticError(error);
+				//throw error;
 				return Expression();
 			}
 			else
@@ -192,7 +242,8 @@ Expression Interpreter::eval(Expression * curLevel)
 					}*/
 					else
 					{
-						std::cout << "Error: Variable not defined\n";
+						std::string error = "Error: Variable not defined\n";
+						throw InterpreterSemanticError(error);
 						return Expression();
 					}
 				}
@@ -204,61 +255,85 @@ Expression Interpreter::eval(Expression * curLevel)
 			}
 		}
 	}
-	catch (std::string e)
+	catch (InterpreterSemanticError error)
 	{
-		std::cout << e << "\n";
+		//std::cout << error.what() << "\n";
+		throw;
 		return Expression();
 	}
 
 	return answer;
 }
-void Interpreter::buildAST(std::vector<std::string> tokens)
+bool Interpreter::buildAST(std::vector<std::string> tokens)
 {
 	Expression *currLevel;
 	Expression *previousLevel;
-
-	for (unsigned int i = 0; i < tokens.size(); i++)
+	if ((tokens[0] == "(") && (tokens[tokens.size() - 1] == ")"))
 	{
-		if (tokens[i] == "(")
+		for (unsigned int i = 0; i < tokens.size(); i++)
 		{
-			if (i == 0)
+			if (tokens[i] == "(")
 			{
-				//if ((tokens[i + 1]))
-				rootAST = checkToken(tokens[i + 1], rootAST);
-				currLevel = rootAST;
-				previousLevel = currLevel;
-				i++;
+				if ((tokens[i + 1] == "(") || (tokens[i + 1] == ")"))
+				{
+					return false;
+				}
+				else
+				{
+					if (i == 0)
+					{
+						rootAST = checkToken(tokens[i + 1], rootAST);
+						if (rootAST->atomType == 0)
+						{
+							return false;
+						}
+						currLevel = rootAST;
+						previousLevel = currLevel;
+						i++;
+					}
+					else
+					{
+
+						previousLevel = currLevel;
+						currLevel = checkToken(tokens[i + 1], currLevel);
+						if (currLevel->atomType == 0)
+						{
+							return false;
+						}
+						//currLevel = new Expression(tokens[i + 1]);
+						currLevel->parent = previousLevel;
+						currLevel->parent->children.push_back(currLevel);
+						i++;
+					}
+				}
+			}
+			else if (tokens[i] == ")")
+			{
+				if (previousLevel->parent != nullptr)
+				{
+					previousLevel = previousLevel->parent;
+				}
+				currLevel = currLevel->parent;
 			}
 			else
 			{
 				previousLevel = currLevel;
-				currLevel = checkToken(tokens[i + 1], currLevel);
-				//currLevel = new Expression(tokens[i + 1]);
+				currLevel = checkToken(tokens[i], currLevel);
+				if (currLevel->atomType == 0)
+				{
+					return false;
+				}
 				currLevel->parent = previousLevel;
 				currLevel->parent->children.push_back(currLevel);
-				i++;
-
+				currLevel = previousLevel;
 			}
-		}
-		else if (tokens[i] == ")")
-		{
-			if (previousLevel->parent != nullptr)
-			{
-				previousLevel = previousLevel->parent;
-			}
-			currLevel = currLevel->parent;
-		}
-		else
-		{
-			previousLevel = currLevel;
-			currLevel = checkToken(tokens[i], currLevel);
-			//currLevel = new Expression(tokens[i]);
-			currLevel->parent = previousLevel;
-			currLevel->parent->children.push_back(currLevel);
-			currLevel = previousLevel;
 		}
 	}
-	return;
+	else
+	{
+		return false;
+	}
+	return true;
 }
 
 void Interpreter::traversePost(Expression * curLevel)
@@ -362,7 +437,15 @@ Expression * Interpreter::checkToken(std::string token, Expression* curLevel)
 			}
 			else
 			{
-				curLevel = new Expression(token);
+				if (!isdigit(token[0]))
+				{
+					curLevel = new Expression(token);
+				}
+				else
+				{
+					curLevel = new Expression();
+				}
+				
 			}
 			//std::cout << tokenVal << "\n";
 			
@@ -375,26 +458,35 @@ Expression Interpreter::add(Expression * curLevel)
 {
 	try
 	{
-		if (curLevel->children.size() > 1)
+		if (curLevel->children.size() > 0)
 		{
 
 			Expression answer = Expression(0.0);
 			for (unsigned int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
 			{
-				answer.doubleAtom += (eval(curLevel->children[childIndex]).doubleAtom);
-				//std::cout << answer->doubleAtom << " ";
+				Expression child = evalExp(curLevel->children[childIndex]);
+				if (child.atomType == 2)
+				{
+					answer.doubleAtom += (child.doubleAtom);
+				}
+				else
+				{
+					std::string error = "Error: Incorrrect argument type for +";
+					throw InterpreterSemanticError(error);
+					return Expression();
+				}
 			}
 			return answer;
 		}
 		else
 		{
-			Expression answer = Expression();
 			std::string error = "Error: Incorrrect number of arguments for +";
-			throw error;
-			return answer;
+			throw InterpreterSemanticError(error);
+			//throw error;
+			return Expression();
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -407,18 +499,29 @@ Expression Interpreter::divide(Expression * curLevel)
 		if (curLevel->children.size() == 2)
 		{
 			Expression answer = Expression(0.0);
-			answer.doubleAtom = (eval(curLevel->children[0]).doubleAtom) / (eval(curLevel->children[1]).doubleAtom);
-			return answer;
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.doubleAtom = (child1.doubleAtom) / (child2.doubleAtom);
+				return answer;
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for /";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
-			Expression answer = Expression();
 			std::string error = "Error: Incorrrect number of arguments for /";
-			throw error;
-			return answer;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -428,24 +531,34 @@ Expression Interpreter::multiply(Expression * curLevel)
 {
 	try
 	{
-		if (curLevel->children.size() > 1)
+		if (curLevel->children.size() > 0)
 		{
 			Expression answer = Expression(1.0);
 			for (unsigned int i = 0; i < curLevel->children.size(); i++)
 			{
-				answer.doubleAtom *= eval(curLevel->children[i]).doubleAtom;
+				Expression child = evalExp(curLevel->children[i]);
+				if (child.atomType == 2)
+				{
+					answer.doubleAtom *= child.doubleAtom;
+				}
+				else
+				{
+					std::string error = "Error: Incorrrect argument type for *";
+					throw InterpreterSemanticError(error);
+					return Expression();
+				}
+				
 			}
 			return answer;
 		}
 		else
 		{
-			Expression answer = Expression();
 			std::string error = "Error: Incorrrect number of arguments for *";
-			throw error;
-			return answer;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
 	}
-	catch(std::string error)
+	catch(InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -458,21 +571,44 @@ Expression Interpreter::subtract(Expression * curLevel)
 		Expression answer = Expression(0.0);
 		if (curLevel->children.size() == 1)
 		{
-			answer.doubleAtom -= (eval(curLevel->children[0]).doubleAtom);
+			Expression child = evalExp(curLevel->children[0]);
+			if (child.atomType == 2)
+			{
+				answer.doubleAtom -= (child.doubleAtom);
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for -";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
+			
 		}
 		else if (curLevel->children.size() == 2)
 		{
-			answer.doubleAtom = (eval(curLevel->children[0]).doubleAtom) - (eval(curLevel->children[1]).doubleAtom);
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.doubleAtom = (child1.doubleAtom) - (child2.doubleAtom);
+
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for -";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
 			std::string error =  "Error: too many arguments for -";
-			throw error;
+			throw InterpreterSemanticError(error);
 			return Expression();
 		}
 		return answer;
 	}
-	catch(std::string error)
+	catch(InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -485,16 +621,29 @@ Expression Interpreter::equal(Expression * curLevel)
 		Expression answer = Expression(false);
 		if (curLevel->children.size() == 2)
 		{
-			answer.boolAtom = (eval(curLevel->children[0]).doubleAtom) == (eval(curLevel->children[1]).doubleAtom);
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.boolAtom = (child1.doubleAtom) == (child2.doubleAtom);
+				return answer;
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for =";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
 			std::string error = "Error: Incorrrect number of arguments for =";
-			throw error;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
-		return answer;
+		
 	}
-	catch(std::string error)
+	catch(InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -507,16 +656,29 @@ Expression Interpreter::greaterEqual(Expression * curLevel)
 		Expression answer = Expression(false);
 		if (curLevel->children.size() == 2)
 		{
-			answer.boolAtom = (eval(curLevel->children[0]).doubleAtom) >= (eval(curLevel->children[1]).doubleAtom);
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.boolAtom = (child1.doubleAtom) >= (child2.doubleAtom);
+				return answer;
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for >=";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
 			std::string error = "Error: Incorrrect number of arguments for >=";
-			throw error;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
-		return answer;
+		
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -529,16 +691,29 @@ Expression Interpreter::greater(Expression * curLevel)
 		Expression answer = Expression(false);
 		if (curLevel->children.size() == 2)
 		{
-			answer.boolAtom = (eval(curLevel->children[0]).doubleAtom) > (eval(curLevel->children[1]).doubleAtom);
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.boolAtom = (child1.doubleAtom) > (child2.doubleAtom);
+				return answer;
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for >";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
 			std::string error = "Error: Incorrrect number of arguments for >";
-			throw error;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
-		return answer;
+
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -551,16 +726,28 @@ Expression Interpreter::lessEqual(Expression * curLevel)
 		Expression answer = Expression(false);
 		if (curLevel->children.size() == 2)
 		{
-			answer.boolAtom = (eval(curLevel->children[0]).doubleAtom) <= (eval(curLevel->children[1]).doubleAtom);
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.boolAtom = (child1.doubleAtom) <= (child2.doubleAtom);
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for <=";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
 			std::string error = "Error: Incorrrect number of arguments for <=";
-			throw error;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
 		return answer;
 	}
-	catch(std::string error)
+	catch(InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -573,16 +760,28 @@ Expression Interpreter::less(Expression * curLevel)
 		Expression answer = Expression(false);
 		if (curLevel->children.size() == 2)
 		{
-			answer.boolAtom = (eval(curLevel->children[0]).doubleAtom) < (eval(curLevel->children[1]).doubleAtom);
+			Expression child1 = evalExp(curLevel->children[0]);
+			Expression child2 = evalExp(curLevel->children[1]);
+			if ((child1.atomType == 2) && (child2.atomType == 2))
+			{
+				answer.boolAtom = (child1.doubleAtom) < (child2.doubleAtom);
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for <";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
 		}
 		else
 		{
 			std::string error = "Error: Incorrrect number of arguments for <";
-			throw error;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
 		return answer;
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -593,25 +792,35 @@ Expression Interpreter::orFunct(Expression * curLevel)
 	try
 	{
 		
-		if (curLevel->children.size() > 1)
+		if (curLevel->children.size() > 0)
 		{
 			Expression answer = Expression(false);
 			for (unsigned int i = 0; i < curLevel->children.size(); i++)
 			{
-				answer.boolAtom = answer.boolAtom || eval(curLevel->children[i]).boolAtom;
+				Expression child = evalExp(curLevel->children[i]);
+				if (child.atomType == 1)
+				{
+					answer.boolAtom = answer.boolAtom || child.boolAtom;
+				}
+				else
+				{
+					std::string error = "Error: Incorrrect argument type for or";
+					throw InterpreterSemanticError(error);
+					return Expression();
+				}
+
 			}
 			return answer;
 		}
 		else
 		{
-			Expression answer = Expression();
 			std::string error = "Error: Not enough arguments for or";
-			throw error;
-			return answer;
+			throw InterpreterSemanticError(error);
+			return Expression();
 		}
 
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -621,12 +830,22 @@ Expression Interpreter::andFunct(Expression * curLevel)
 {
 	try
 	{
-		if (curLevel->children.size() > 1)
+		if (curLevel->children.size() > 0)
 		{
 			Expression answer = Expression(true);
 			for (unsigned int i = 0; i < curLevel->children.size(); i++)
 			{
-				answer.boolAtom = answer.boolAtom && eval(curLevel->children[i]).boolAtom;
+				Expression child = evalExp(curLevel->children[i]);
+				if (child.atomType == 1)
+				{
+					answer.boolAtom = answer.boolAtom && child.boolAtom;
+				}
+				else
+				{
+					std::string error = "Error: Incorrrect argument type for and";
+					throw InterpreterSemanticError(error);
+					return Expression();
+				}
 			}
 			return answer;
 		}
@@ -634,11 +853,11 @@ Expression Interpreter::andFunct(Expression * curLevel)
 		{
 			Expression answer = Expression();
 			std::string error = "Error: Not enough arguments for and";
-			throw error;
+			throw InterpreterSemanticError(error);
 			return answer;
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -652,18 +871,29 @@ Expression Interpreter::notFunct(Expression * curLevel)
 		if (curLevel->children.size() == 1)
 		{
 			Expression answer = Expression(true);
-			answer.boolAtom = !eval(curLevel->children[0]).boolAtom;
+			Expression child = evalExp(curLevel->children[0]);
+			if (child.atomType == 1)
+			{
+				answer.boolAtom = !child.boolAtom;
+			}
+			else
+			{
+				std::string error = "Error: Incorrrect argument type for not";
+				throw InterpreterSemanticError(error);
+				return Expression();
+			}
+			
 			return answer;
 		}
 		else
 		{
 			Expression answer = Expression();
 			std::string error = "Error: Not enough arguments for and";
-			throw error;
+			throw InterpreterSemanticError(error);
 			return answer;
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -675,23 +905,23 @@ Expression Interpreter::ifExpression(Expression * curLevel)
 	{
 		if (curLevel->children.size() == 3)
 		{
-			Expression answer = eval(curLevel->children[0]);
+			Expression answer = evalExp(curLevel->children[0]);
 			if (answer.atomType == 1)
 			{
 				if (answer.boolAtom)
 				{
-					return eval(curLevel->children[1]);
+					return evalExp(curLevel->children[1]);
 				}
 				else
 				{
-					return eval(curLevel->children[2]);
+					return evalExp(curLevel->children[2]);
 				}
 			}
 			else
 			{
 				Expression answer = Expression();
 				std::string error = "Error: Incorrect type for condition expression";
-				throw error;
+				throw InterpreterSemanticError(error);
 				return answer;
 			}
 		}
@@ -699,11 +929,11 @@ Expression Interpreter::ifExpression(Expression * curLevel)
 		{
 			Expression answer = Expression();
 			std::string error = "Error: Incorrect number of arguments for if";
-			throw error;
+			throw InterpreterSemanticError(error);
 			return answer;
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -717,18 +947,19 @@ Expression Interpreter::begin(Expression * curLevel)
 		{
 			for (unsigned int i = 0; i < curLevel->children.size() - 1; i++)
 			{
-				eval(curLevel->children[i]);
+				evalExp(curLevel->children[i]);
 			}
-			return eval(curLevel->children[curLevel->children.size() - 1]);
+			return evalExp(curLevel->children[curLevel->children.size() - 1]);
 		}
 		else
 		{
 			Expression answer = Expression();
 			std::string error = "Error: no expressions to evaluate";
+			throw InterpreterSemanticError(error);
 			return answer;
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}
@@ -746,12 +977,12 @@ Expression Interpreter::define(Expression * curLevel)
 				{
 					Expression answer = Expression();
 					std::string error = "Error: Can not overwrite variable";
-					throw error;
+					throw InterpreterSemanticError(error);
 					return answer;
 				}
 				else
 				{
-					Expression answer = eval(curLevel->children[1]);
+					Expression answer = evalExp(curLevel->children[1]);
 					if (answer.atomType == 1)
 					{
 						environment.addBoolSymbol(curLevel->children[0]->stringAtom, answer.boolAtom);
@@ -766,7 +997,7 @@ Expression Interpreter::define(Expression * curLevel)
 					{
 						Expression answer = Expression();
 						std::string error = "Error: Can not define variable";
-						throw error;
+						throw InterpreterSemanticError(error);
 						return answer;
 					}
 
@@ -777,7 +1008,7 @@ Expression Interpreter::define(Expression * curLevel)
 			{
 				Expression answer = Expression();
 				std::string error = "Error: Invalid variable name";
-				throw error;
+				throw InterpreterSemanticError(error);
 				return answer;
 			}
 		}
@@ -785,11 +1016,11 @@ Expression Interpreter::define(Expression * curLevel)
 		{
 			Expression answer = Expression();
 			std::string error = "Error: Invalid number of arguments for define";
-			throw error;
+			throw InterpreterSemanticError(error);
 			return answer;
 		}
 	}
-	catch (std::string error)
+	catch (InterpreterSemanticError error)
 	{
 		throw;
 	}

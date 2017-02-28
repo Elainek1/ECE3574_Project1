@@ -26,6 +26,7 @@ public:
 	bool getBoolSymbol(std::string symbol);
 	functPtr getFunctPtr(std::string symbol);
 	//bool addBoolSymbol(std::string symbol, bool value);
+	void reset();
 private:
 	std::unordered_map < std::string, functPtr > environmentMap0;
 	std::unordered_map<std::string, double> environmentMap2;

@@ -2,6 +2,7 @@
 #include "environment.hpp"
 #include "expression.hpp"
 #include "tokenize.hpp"
+#include "interpreter_semantic_error.hpp"
 
 #include <vector>
 #include <string>
@@ -13,7 +14,7 @@ using namespace std;
 
 int main(int argc, char*argv[])
 {
-	Interpreter interpreter = Interpreter();
+	Interpreter interpreter;// = Interpreter();
 	string filename;  //for storing the filename grabbed from commandline
 	string input;
 	std::vector<std::string>  arguments;
@@ -31,18 +32,66 @@ int main(int argc, char*argv[])
 		{
 			cout << "vtscript>";
 			getline(cin, input);
-			if (input == "q")
+			if (input == "quit")
 			{
 				break;
 			}
-			std::istringstream inputString(input);
-			bool parsePass = interpreter.parse(inputString);
-			if (!parsePass)
+			else if (input != "")
 			{
-				cout << "Error: Parsing error" << endl;
-				interpreter = Interpreter();
-				//return EXIT_FAILURE;
+				std::istringstream inputString(input);
+				/*std::string inputAll = "";
+				std::string inputPart = "";
+				while (!inputString.eof())
+				{
+					getline(inputString, inputPart);
+					for (int i = 0; i < inputPart.size(); i++)
+					{
+						if (inputPart[i] == ';')
+						{
+							break;
+						}
+						else
+						{
+							inputAll += inputPart[i];
+						}
+					}
+					inputAll += '\n';
+
+				}
+				std::istringstream inputStr(inputAll);*/
+				bool parsePass = interpreter.parse(inputString);
+				if (!parsePass)
+				{
+					cout << "Error: Parsing error" << endl;
+					interpreter.reset();// = Interpreter(); //create reset method instead
+					//return EXIT_FAILURE;
+				}
+				else
+				{
+
+					try
+					{
+						Expression result = interpreter.eval();
+						if (result.atomType == 0)
+						{
+							//call interpreter reset method
+							interpreter.reset();
+						}
+						else
+						{
+							interpreter.printExpression(result);
+						}
+					}
+					catch (InterpreterSemanticError error)
+					{
+						//call interpreter reset method
+						interpreter.reset();
+						std::cout << error.what() << "\n";
+
+					}
+				}
 			}
+			
 		}
 	}
 	else if(argc == 2)
@@ -54,30 +103,52 @@ int main(int argc, char*argv[])
 			cout << "Error: Could not open file" << endl;
 			return EXIT_FAILURE; //if file doesnt open then return
 		}
-		std::string inputAll = "";
+		/*std::string inputAll = "";
 		std::string inputPart = "";
 		while (!inputString.eof())
 		{
 			getline(inputString, inputPart);
-			if (inputPart.size() > 0)
+			for (int i = 0; i < inputPart.size(); i++)
 			{
-				if (inputPart[0] == ';')
+				if (inputPart[i] == ';')
 				{
-
+					break;
 				}
 				else
 				{
-					inputAll += inputPart;
+					inputAll += inputPart[i];
 				}
 			}
+			inputAll += '\n';
 			
 		}
-		std::istringstream inputStr(inputAll);
-		bool parsePass = interpreter.parse(inputStr);
+		std::istringstream inputStr(inputAll);*/
+		bool parsePass = interpreter.parse(inputString);
 		if (!parsePass)
 		{
 			cout << "Error: Parsing error" << endl;
 			return EXIT_FAILURE;
+		}
+		else
+		{
+			try
+			{
+				Expression result = interpreter.eval();
+				if (result.atomType == 0)
+				{
+					std::cout << "Error when evaluating \n";
+					return EXIT_FAILURE;
+				}
+				else
+				{
+					interpreter.printExpression(result);
+				}
+			}
+			catch (InterpreterSemanticError error)
+			{
+				std::cout << error.what() << "\n";
+				return EXIT_FAILURE;
+			}
 		}
 	}
 	else if(argc == 3)
@@ -86,11 +157,52 @@ int main(int argc, char*argv[])
 		{
 			input = arguments[argc-1];
 			std::istringstream inputString(input);
+			/*std::string inputAll = "";
+			std::string inputPart = "";
+			while (!inputString.eof())
+			{
+				getline(inputString, inputPart);
+				for (int i = 0; i < inputPart.size(); i++)
+				{
+					if (inputPart[i] == ';')
+					{
+						break;
+					}
+					else
+					{
+						inputAll += inputPart[i];
+					}
+				}
+				inputAll += '\n';
+
+			}
+			std::istringstream inputStr(inputAll);*/
 			bool parsePass = interpreter.parse(inputString);
 			if (!parsePass)
 			{
 				cout << "Error: Parsing error" << endl;
 				return EXIT_FAILURE;
+			}
+			else
+			{
+				try
+				{
+					Expression result = interpreter.eval();
+					if (result.atomType == 0)
+					{
+						std::cout << "Error when evaluating \n";
+						return EXIT_FAILURE;
+					}
+					else
+					{
+						interpreter.printExpression(result);
+					}
+				}
+				catch (InterpreterSemanticError error)
+				{
+					std::cout << error.what() << "\n";
+					return EXIT_FAILURE;
+				}
 			}
 		}
 		else
