@@ -21,18 +21,25 @@ public:
 	// the exception message string should document the nature of the semantic error 
 	Expression eval();
 	Expression evalExp(Expression * curLevel);
-	void printExpression(Expression curLevel);
-	void reset();
+	void printExpression(Expression curLevel); //print expression
+	void reset(); //resets the interpreter environment
 private:
-	Environment environment;
-
+	Environment environment; //intialize the environment
+	
+	//used to point to the root of the tree
 	Expression * rootAST;
+
+	//builds the AST
 	bool buildAST(std::vector<std::string> tokens);
+
+	//deletes the AST
 	void deleteAST(Expression * curLevel);
-	Expression* checkToken(std::string token, Expression * curLevel);
 
-	void traversePost(Expression* curLevel);
+	Expression* checkToken(std::string token, Expression * curLevel); //this reads in the token and checks for parsing error
 
+	void traversePost(Expression* curLevel); //traverses the tree and prints it out
+
+	//functions to evaluate the expressions
 	Expression add(Expression * curLevel);
 	Expression divide(Expression * curLevel);
 	Expression multiply(Expression * curLevel);

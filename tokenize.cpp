@@ -18,7 +18,7 @@ std::vector<std::string> tokenizeInput(std::istream & inputString)
 			if (token[i] == '(') //push ( into vector
 			{
 				parenthesisCounter++;
-				if (variable.size())  //if variable before ( push that into vector first
+				if (variable.size() > 0)  //if variable before ( push that into vector first
 				{
 					tokens.push_back(variable);
 					variable.clear();
@@ -28,7 +28,7 @@ std::vector<std::string> tokenizeInput(std::istream & inputString)
 			else if (token[i] == ')') //push ) into vector
 			{
 				parenthesisCounter--;
-				if (variable.size()) //if variable before ) push that into vector first
+				if (variable.size() > 0) //if variable before ) push that into vector first
 				{
 					tokens.push_back(variable);
 					variable.clear();

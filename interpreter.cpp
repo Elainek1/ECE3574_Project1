@@ -7,13 +7,12 @@
 
 Interpreter::Interpreter()
 {
-	//environment = Environment();
 	rootAST = nullptr;
 }
 
 Interpreter::~Interpreter()
 {
-
+	//makes sure to delete the tree
 	deleteAST(rootAST);
 	rootAST = nullptr;
 
@@ -21,6 +20,7 @@ Interpreter::~Interpreter()
 
 void Interpreter::reset()
 {
+	//this resets the the interpreter by deleting AST and reseting environment
 	deleteAST(rootAST);
 	rootAST = nullptr;
 	environment.reset();
@@ -31,19 +31,18 @@ void Interpreter::reset()
 bool Interpreter::parse(std::istream & expression) noexcept
 {
 	std::vector<std::string> tokens;
-	//std::istringstream inputString(input);
 	std::string inputAll = "";
 	std::string inputPart = "";
-	while (!expression.eof())
+	while (!expression.eof()) //while there is still input
 	{
-		getline(expression, inputPart);
-		for (int i = 0; i < inputPart.size(); i++)
+		getline(expression, inputPart);  //get the line
+		for (int i = 0; i < inputPart.size(); i++)  //this checks to see if there is a ;
 		{
-			if (inputPart[i] == ';')
+			if (inputPart[i] == ';') //if there is one then the rest following it is a comment
 			{
 				break;
 			}
-			else
+			else //otherwise you add it to the input
 			{
 				inputAll += inputPart[i];
 			}
@@ -51,56 +50,18 @@ bool Interpreter::parse(std::istream & expression) noexcept
 		inputAll += '\n';
 
 	}
-	std::istringstream inputStr(inputAll);
-	tokens = tokenizeInput(inputStr);
-	/*
-	for (int i = 0; i < tokens.size(); i++) //print the token
-	{
-		std::cout << tokens[i] << '\n';
-	}
-	*/
-	if (tokens.size()>1)
+	std::istringstream inputStr(inputAll); //make input a stream
+	tokens = tokenizeInput(inputStr); //feed it to the tokenizeInput to get the tokens
+
+	if (tokens.size()>1) //if there is tokens 
 	{
 		
-		if (!buildAST(tokens))
+		if (!buildAST(tokens)) //try to build the AST
 		{
-			return false;
+			return false; //if that fails then parsing failed
 		}
-/*
-		try
-		{
-			Expression output = eval();		
-		
-			if (output.atomType == 0)
-			{
-				//deleteAST(rootAST);
-				environment = Environment();
-				//return false;
-			}
-			else
-			{
-				printExpression(output);
-			}
-		}
-		catch (InterpreterSemanticError error)
-		{
-			environment = Environment();
-		}
-		deleteAST(rootAST);
-		rootAST = nullptr;
-		*/
-		/*
-		if (output.atomType == 0)
-		{
-			environment = Environment();
-			//return false;
-		}
-		else
-		{
-			printExpression(output);
-		}
-		*/
-		return true;
+
+		return true; //otherwise return true parsing suceeded
 	}
 	return false;
 }
@@ -112,44 +73,37 @@ Expression Interpreter::eval()
 {
 	try
 	{
-		Expression answer = evalExp(rootAST);
-		deleteAST(rootAST);
-		rootAST = nullptr;
-		return answer;
+		Expression answer = evalExp(rootAST); //try to evaluate the tree
+		deleteAST(rootAST); //delete the tree
+		rootAST = nullptr; //reset pointer
+		return answer; //return the result of the evaluation
 	}
-	catch (InterpreterSemanticError error)
+	catch (InterpreterSemanticError error)  //catch any error that occurs
 	{
 		//std::cout << error.what() << "\n";
-		deleteAST(rootAST);
-		rootAST = nullptr;
-		throw;
+		deleteAST(rootAST); //delete the tree
+		rootAST = nullptr; //reset pointer
+		throw; //throw the error
 	}
 	
 }
+
+//this is a recursive function that evaluates the current expression node
 Expression Interpreter::evalExp(Expression * curLevel)
 {
-	Expression answer = Expression();
+	Expression answer = Expression(); //creates answer expression
 	//answer.doubleAtom = 0;
 	try {
-		if (curLevel == nullptr)
+		if (curLevel == nullptr)  //if there is nothing then can't evaluate it
 		{
-			//Expression * answer = new Expression(0.0);
-			//return *answer;
-			//throw "Error: Nothing to evaluate";
 			std::string error = "Error: Nothing to evaluate";
-			throw InterpreterSemanticError(error);
+			throw InterpreterSemanticError(error); //throw an error
 			return Expression();
 		}
-		else
+		else //otherwise check which operation it is
 		{
-			/*
-			switch (curLevel->stringAtom)
-			{
-			case "+":
-				return add(curLevel);
-			case "/":
-				return divide(curLevel);
-			}*/
+			//check to see if any of the string is an operation we must perform
+			//if it is then call the corresponding function
 			if (curLevel->stringAtom == "+")
 			{
 				return add(curLevel);
@@ -210,44 +164,40 @@ Expression Interpreter::evalExp(Expression * curLevel)
 			{
 				return define(curLevel);
 			}
+			//otherwise if it is none then there is an error
 			else if (curLevel->atomType == Expression::noneType)
 			{
 				std::string error = "Error: Input is not valid";
-				throw InterpreterSemanticError(error);
-				//throw error;
+				throw InterpreterSemanticError(error); //throw the error
 				return Expression();
 			}
-			else
+			else  //if neither of those then check to see if it is a variable defined in the environment
 			{
 				if (curLevel->atomType == 3) //if it is a string
 				{
-					int a = environment.symbolExist(curLevel->stringAtom);
-					if (a == 1)
+					int a = environment.symbolExist(curLevel->stringAtom); //check to see if symbol exists
+					if (a == 1) //if a one is returned then it was a bool answer
 					{
 						if (curLevel->children.size() == 0)
 						{
-							return Expression(environment.getBoolSymbol(curLevel->stringAtom));
+							return Expression(environment.getBoolSymbol(curLevel->stringAtom)); //return this bool answer
 						}
 					}
-					else if (a == 2)
+					else if (a == 2) //if it was a two then it was a double answer
 					{
 						if (curLevel->children.size() == 0)
 						{
-							return Expression(environment.getDoubleSymbol(curLevel->stringAtom));
+							return Expression(environment.getDoubleSymbol(curLevel->stringAtom)); //return this double answer
 						}
-					}/*
-					else if (a == 3)
-					{
-						environment.getFunctPtr(curLevel->stringAtom)(curLevel);
-					}*/
-					else
+					}
+					else //otherwise it means the variable isn't defined in the environment
 					{
 						std::string error = "Error: Variable not defined\n";
-						throw InterpreterSemanticError(error);
-						return Expression();
+						throw InterpreterSemanticError(error); //throw an error then
+						return Expression(); //return none type
 					}
 				}
-				else
+				else //otherwise just return the current expression
 				{
 					return *curLevel;
 				}
@@ -255,205 +205,216 @@ Expression Interpreter::evalExp(Expression * curLevel)
 			}
 		}
 	}
-	catch (InterpreterSemanticError error)
+	catch (InterpreterSemanticError error) //catch any errors thrown
 	{
-		//std::cout << error.what() << "\n";
-		throw;
+		throw; //rethrow the error
 		return Expression();
 	}
 
-	return answer;
+	return answer; //return the answer in the end
 }
+
+//this builds the AST based on the vector of tokens that is given as input
+//the function returns a boolean, true meaning the tree building was successful
+//false indicates that the tree didn't build successfully
 bool Interpreter::buildAST(std::vector<std::string> tokens)
 {
 	Expression *currLevel;
 	Expression *previousLevel;
+	//if the first and last do not have () it automatically isn't a good tree
 	if ((tokens[0] == "(") && (tokens[tokens.size() - 1] == ")"))
 	{
+		//loop through the token vector
 		for (unsigned int i = 0; i < tokens.size(); i++)
 		{
+			//if it is a ( then you start a new node in the tree
 			if (tokens[i] == "(")
 			{
+				//make sure the next token is a valid atom value
 				if ((tokens[i + 1] == "(") || (tokens[i + 1] == ")"))
 				{
-					return false;
+					return false;//otherwise it isn't so return false
 				}
 				else
 				{
-					if (i == 0)
+					if (i == 0)//if it is the first ( then you know that it is the root
 					{
-						rootAST = checkToken(tokens[i + 1], rootAST);
-						if (rootAST->atomType == 0)
+						rootAST = checkToken(tokens[i + 1], rootAST); //make the root node
+						if (rootAST->atomType == 0) //if it is a none type then it failed
 						{
-							return false;
+							return false; //return false
 						}
-						currLevel = rootAST;
+						currLevel = rootAST; //otherwise you can update the pointers
 						previousLevel = currLevel;
-						i++;
+						i++; //increment to next token
 					}
-					else
+					else //otherwise it isn't the first node so use the currLevel pointer
 					{
 
 						previousLevel = currLevel;
-						currLevel = checkToken(tokens[i + 1], currLevel);
+						currLevel = checkToken(tokens[i + 1], currLevel); //create the next node in the tree
 						if (currLevel->atomType == 0)
 						{
 							return false;
 						}
-						//currLevel = new Expression(tokens[i + 1]);
-						currLevel->parent = previousLevel;
+						//make sure to connect the node to the rest of the tree
+						currLevel->parent = previousLevel; //do this by connect parent and children association
 						currLevel->parent->children.push_back(currLevel);
-						i++;
+						i++; //move to next token
 					}
 				}
 			}
-			else if (tokens[i] == ")")
+			else if (tokens[i] == ")") //if it is ) then you end the current level and move up in the tree
 			{
-				if (previousLevel->parent != nullptr)
+				if (previousLevel->parent != nullptr) //if it is not null then you are not at the root so you can move up
 				{
-					previousLevel = previousLevel->parent;
+					previousLevel = previousLevel->parent;  //move up
 				}
-				currLevel = currLevel->parent;
+				currLevel = currLevel->parent; //move up
 			}
-			else
+			else //otherwise it is an atom value and needs to be a child
 			{
 				previousLevel = currLevel;
-				currLevel = checkToken(tokens[i], currLevel);
+				currLevel = checkToken(tokens[i], currLevel); //make the new node
 				if (currLevel->atomType == 0)
 				{
 					return false;
 				}
 				currLevel->parent = previousLevel;
-				currLevel->parent->children.push_back(currLevel);
-				currLevel = previousLevel;
+				currLevel->parent->children.push_back(currLevel); //make it a children
+				currLevel = previousLevel; //update the pointer
 			}
 		}
 	}
-	else
+	else //this return false is for the bad tree () beginning
 	{
 		return false;
 	}
-	return true;
+	return true; //if everything else executes correctly then the tree was successfully built
 }
 
+//this traverses the tree recursively and prints the expression at each node in the pree
+//this function was used for debugging purposes
 void Interpreter::traversePost(Expression * curLevel)
 {
-	if (curLevel == nullptr)
+	if (curLevel == nullptr) //if the pointer is null then there is nothing to print
 	{
 		return;
 	}
-	else
+	else //otherwise go through each children
 	{
 
 		for (unsigned int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
 		{
-			traversePost(curLevel->children[childIndex]);
+			traversePost(curLevel->children[childIndex]); //call traverse on each children
 		}
 		
-		printExpression(*curLevel);
-		//std::cout << curLevel->boolAtom << "," << curLevel->doubleAtom << "," << curLevel->stringAtom << std::endl;
+		printExpression(*curLevel); //print the expressioin
 	}
 }
 
+//this deletes the AST to make sure that there is not memory leak
+//the pointer that is fed in should be the root node pointer
 void Interpreter::deleteAST(Expression * curLevel)
 {
-	if (curLevel == nullptr)
+	if (curLevel == nullptr) //if does not point to anything then you don't have to delete anything
 	{
 		return;
 	}
-	else
+	else //otherwise loop through each children and call deleteAST on it to delete them first
 	{
 
 		for (unsigned int childIndex = 0; childIndex < curLevel->children.size(); childIndex++)
 		{
 			deleteAST(curLevel->children[childIndex]);
 		}
-		delete curLevel;
+		delete curLevel; //then delete yourself
 	}
 }
 
+//this prints the expression out
+//the pointer that is fed in is the pointer to the expression that we want to print
 void Interpreter::printExpression(Expression curLevel)
 {
-	if (curLevel.atomType == 0)
+	if (curLevel.atomType == 0) //if it is a none type then you print ()
 	{
 		std::cout << "()\n";
 	}
-	else if (curLevel.atomType == 1)
+	else if (curLevel.atomType == 1) //if it is a boolean type
 	{
-		if (curLevel.boolAtom)
+		if (curLevel.boolAtom) //then read the value
 		{
-			std::cout << "(True)\n";
+			std::cout << "(True)\n"; //if it is true then print true
 		}
-		else
+		else //else print false
 		{
 			std::cout << "(False)\n";
 		}
 	}
-	else if (curLevel.atomType == 2)
+	else if (curLevel.atomType == 2) //if it is a double type
 	{
-		std::cout << "(" << curLevel.doubleAtom << ")\n";
+		std::cout << "(" << curLevel.doubleAtom << ")\n"; //then print the value of the double
 	}
-	else if (curLevel.atomType == 3)
+	else if (curLevel.atomType == 3) //if it is a string type
 	{
-		std::cout << "(" << curLevel.stringAtom << ")\n";
+		std::cout << "(" << curLevel.stringAtom << ")\n"; //then print the value of the string
 	}
 	return;
 }
 
+//this epxression takes in a token and the pointer that is suppose to pointer to the expression created
+//and it returns the pointer of the expression, this is used to assign value to the pointer in the calling function
 Expression * Interpreter::checkToken(std::string token, Expression* curLevel)
 {
-	/*if (isdigit(token[0]))
-	{
-		double tokenVal;
-		std::stringstream(token) >> tokenVal;
-		std::cout << tokenVal;// std::stoi(token) << (double)std::stoi(token);
-		std::cout << std::stod(token);
-		curLevel = new Expression(std::stod(token));
-	}*/
-	if ((token == "True"))
+	if ((token == "True")) //if it is true then create the Expression with value true
 	{
 		curLevel = new Expression(true);
 	}
-	else if (token == "False")
+	else if (token == "False") //if it is false create expression with value false
 	{
 		curLevel = new Expression(false);
 	}
-	else
+	else //otherwise need to determine what type of token it is
 	{
-		double tokenVal;
-		std::stringstream parser;
-		parser << token;
-		parser >> tokenVal;
-		if (parser.fail())
+		double tokenVal; //this is to hold the token
+		std::stringstream parser; //create this so we can read in the token
+		parser << token; //push token into the stream
+		parser >> tokenVal; //try to assign token value to the double holder
+		if (parser.fail()) //if it did fail
 		{
-			parser.clear();
-			curLevel = new Expression(token);
+			parser.clear(); //then that means that there was no digits at all
+			curLevel = new Expression(token); //create a Expression that is purely string
 		}
 		else
 		{
-			if (parser.eof())
+			if (parser.eof()) //if all of it was read into the double holder
 			{
-				curLevel = new Expression(tokenVal);
+				curLevel = new Expression(tokenVal); //then create an expression that is a double
 			}
-			else
+			else //otherwise it is a string
 			{
-				if (!isdigit(token[0]))
+				if (!isdigit(token[0])) //if the first character in the string is not a digit
 				{
-					curLevel = new Expression(token);
+					curLevel = new Expression(token); //then it is a valid string expressioin
 				}
-				else
+				else //otherwise it isn't valid so return the none type expression
 				{
 					curLevel = new Expression();
 				}
-				
 			}
-			//std::cout << tokenVal << "\n";
-			
 		}
 	}
 	return curLevel;
 }
 
+
+//the rest of these functions are for the evaluation of the expression
+//each function takes in a pointer to the expression that needs to be valuated
+//the function returns an expression that contains the value of the evaluation
+
+//for example the add function sees the expression that contains +
+//that means we need to recursively evaluate the children and then add them all together
+//and that result is what it returns
 Expression Interpreter::add(Expression * curLevel)
 {
 	try

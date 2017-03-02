@@ -24,53 +24,39 @@ int main(int argc, char*argv[])
 	}
     // code can use arguments as a C++ vector of C++ strings 
 	
-	//if there are more than one arguments grab the last one and use that for the filename
+	//if no arguments then enter repel mode
 	if(argc == 1)
 	{
 		//std::vector<std::string> tokens;
 		while (true)
 		{
+			//prompt user
 			cout << "vtscript>";
 			getline(cin, input);
 			if (input == "quit")
 			{
+				//if wants to quit then return
 				break;
 			}
 			else if (input != "")
 			{
+				//parse the input
 				std::istringstream inputString(input);
-				/*std::string inputAll = "";
-				std::string inputPart = "";
-				while (!inputString.eof())
-				{
-					getline(inputString, inputPart);
-					for (int i = 0; i < inputPart.size(); i++)
-					{
-						if (inputPart[i] == ';')
-						{
-							break;
-						}
-						else
-						{
-							inputAll += inputPart[i];
-						}
-					}
-					inputAll += '\n';
-
-				}
-				std::istringstream inputStr(inputAll);*/
 				bool parsePass = interpreter.parse(inputString);
+				//if parse fails then print error and reset interpreter
 				if (!parsePass)
 				{
 					cout << "Error: Parsing error" << endl;
 					interpreter.reset();// = Interpreter(); //create reset method instead
 					//return EXIT_FAILURE;
 				}
+				//if not failed then try to build tree and evaluate it
 				else
 				{
 
 					try
 					{
+						//try to evaluate the tree
 						Expression result = interpreter.eval();
 						if (result.atomType == 0)
 						{
@@ -79,9 +65,11 @@ int main(int argc, char*argv[])
 						}
 						else
 						{
+							//print out the result
 							interpreter.printExpression(result);
 						}
 					}
+					//if error thrown then catch it and display the error
 					catch (InterpreterSemanticError error)
 					{
 						//call interpreter reset method
@@ -94,6 +82,7 @@ int main(int argc, char*argv[])
 			
 		}
 	}
+	//if a file name has been given then open it to become an input stream
 	else if(argc == 2)
 	{
 		filename = arguments[argc-1];
@@ -101,82 +90,48 @@ int main(int argc, char*argv[])
 		if (!inputString)
 		{
 			cout << "Error: Could not open file" << endl;
-			return EXIT_FAILURE; //if file doesnt open then return
+			return EXIT_FAILURE; //if file doesnt open then return failure
 		}
-		/*std::string inputAll = "";
-		std::string inputPart = "";
-		while (!inputString.eof())
-		{
-			getline(inputString, inputPart);
-			for (int i = 0; i < inputPart.size(); i++)
-			{
-				if (inputPart[i] == ';')
-				{
-					break;
-				}
-				else
-				{
-					inputAll += inputPart[i];
-				}
-			}
-			inputAll += '\n';
-			
-		}
-		std::istringstream inputStr(inputAll);*/
+		//parse input
 		bool parsePass = interpreter.parse(inputString);
 		if (!parsePass)
 		{
 			cout << "Error: Parsing error" << endl;
-			return EXIT_FAILURE;
+			return EXIT_FAILURE;  //if parsing fails then return failure
 		}
 		else
 		{
+			//otherwise try evaluating tree
 			try
 			{
 				Expression result = interpreter.eval();
 				if (result.atomType == 0)
 				{
 					std::cout << "Error when evaluating \n";
-					return EXIT_FAILURE;
+					return EXIT_FAILURE;  //if evaluating tree fails then return failure
 				}
 				else
 				{
+					//print out result
 					interpreter.printExpression(result);
 				}
 			}
+			//catch error thrown
 			catch (InterpreterSemanticError error)
 			{
-				std::cout << error.what() << "\n";
-				return EXIT_FAILURE;
+				std::cout << error.what() << "\n";  //print out error
+				return EXIT_FAILURE; //return exit failure
 			}
 		}
 	}
+	//if -e flag is given then use the next argument as input
 	else if(argc == 3)
 	{
 		if(arguments[argc-2]=="-e")
 		{
 			input = arguments[argc-1];
 			std::istringstream inputString(input);
-			/*std::string inputAll = "";
-			std::string inputPart = "";
-			while (!inputString.eof())
-			{
-				getline(inputString, inputPart);
-				for (int i = 0; i < inputPart.size(); i++)
-				{
-					if (inputPart[i] == ';')
-					{
-						break;
-					}
-					else
-					{
-						inputAll += inputPart[i];
-					}
-				}
-				inputAll += '\n';
-
-			}
-			std::istringstream inputStr(inputAll);*/
+			
 			bool parsePass = interpreter.parse(inputString);
 			if (!parsePass)
 			{
@@ -205,6 +160,7 @@ int main(int argc, char*argv[])
 				}
 			}
 		}
+		//otherwise the argument wasn't what it was expecting
 		else
 		{
 			cout << "Error: Unexpected arguments of " << arguments[argc-2] << endl; //not appropriate -e flag specified so return with exit failure

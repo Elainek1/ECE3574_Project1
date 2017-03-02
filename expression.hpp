@@ -28,9 +28,6 @@ public:
 	// Construct an Expression with a single Number atom with value
 	Expression(double value);
 
-	// Construct an Expression with a single Number atom with value
-	Expression(int value);
-
 	// Construct an Expression with a single Symbol atom with value
 	Expression(const std::string & value);
 
